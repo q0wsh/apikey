@@ -6,10 +6,10 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // СПИСОК МОДЕЛЕЙ - БУДЕТ ПЕРЕБИРАТЬ ПРИ ОШИБКЕ
 const MODELS = [
-  "gemini-1.5-flash",      // самая стабильная, большие квоты
-  "gemini-2.0-flash",      // если 1.5 не сработает
-  "gemini-1.5-flash-lite", // лёгкая версия
-  "gemini-pro"             // старая модель как запасной вариант
+  "gemini-2.0-flash", 
+  "gemini-1.5-flash", 
+  "gemini-1.5-flash-8b", // Очень маленькая, но быстрая модель
+  "gemini-1.5-pro"       // Мощная модель, часто имеет свои лимиты
 ];
 
 export default async function handler(req, res) {
