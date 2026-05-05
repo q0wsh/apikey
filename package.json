@@ -1,9 +1,7 @@
 {
-  "name": "text-simplifier-api",
+  "name": "gemini-simplifier-api",
+  "version": "1.0.0",
   "type": "module",
-  "scripts": {
-    "start": "node api/simplify.js"
-  },
   "dependencies": {
     "@google/generative-ai": "^0.21.0"
   }
