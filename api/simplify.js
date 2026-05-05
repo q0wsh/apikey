@@ -1,3 +1,5 @@
+// ВРЕМЕННАЯ ПРОВЕРКА — напишет в логи, какой код выполняется
+console.log("=== НОВАЯ ВЕРСИЯ КОДА С ПЕРЕБОРОМ МОДЕЛЕЙ ===");
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -23,7 +25,8 @@ export default async function handler(req, res) {
   }
 
   const fullPrompt = `${systemPrompt}\n\n${userPrompt || text}`;
-  
+
+  console.log(`📋 Доступные модели: ${MODELS.join(", ")}`);
   // 2. ПЕРЕБИРАЕМ МОДЕЛИ
   let lastError = null;
   
