@@ -9,9 +9,8 @@ const API_KEYS = [
 
 // 2. СПИСОК МОДЕЛЕЙ (От самых мощных к самым быстрым)
 const MODELS = [
-  "gemini-2.0-flash",
-  "gemini-1.5-flash",
-  "gemini-1.5-flash-8b", // Самые высокие лимиты на бесплатном тарифе
+  "gemini-1.5-flash-8b",
+  "gemini-1.5-flash", // Самые высокие лимиты на бесплатном тарифе
   "gemini-pro"
 ];
 
