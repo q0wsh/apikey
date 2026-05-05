@@ -9,9 +9,10 @@ const API_KEYS = [
 
 // 2. СПИСОК МОДЕЛЕЙ (От самых мощных к самым быстрым)
 const MODELS = [
-  "gemini-1.5-flash-8b",
-  "gemini-1.5-flash", // Самые высокие лимиты на бесплатном тарифе
-  "gemini-pro"
+  "gemini-2.0-flash",
+  "gemini-2.0-flash-lite", 
+  "gemini-2.5-flash-lite",
+  "gemini-flash-latest"
 ];
 
 export default async function handler(req, res) {
