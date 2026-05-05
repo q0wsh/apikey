@@ -1,45 +1,65 @@
-// api/simplify.js
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// API ключ хранится в переменной окружения на сервере
-// (не в коде! будет добавлен позже в настройках Vercel)
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
+// СПИСОК МОДЕЛЕЙ - БУДЕТ ПЕРЕБИРАТЬ ПРИ ОШИБКЕ
+const MODELS = [
+  "gemini-1.5-flash",      // самая стабильная, большие квоты
+  "gemini-2.0-flash",      // если 1.5 не сработает
+  "gemini-1.5-flash-lite", // лёгкая версия
+  "gemini-pro"             // старая модель как запасной вариант
+];
+
 export default async function handler(req, res) {
-  // 1. Разрешаем только POST запросы
+  // 1. Проверка метода
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // 2. Получаем данные от расширения
-  const { text, level, systemPrompt, userPrompt } = req.body;
+  const { text, systemPrompt, userPrompt } = req.body;
 
   if (!text) {
     return res.status(400).json({ error: 'No text provided' });
   }
 
-  try {
-    // 3. Выбираем модель
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    
-    // 4. Формируем полный промпт
-    const fullPrompt = `${systemPrompt}\n\n${userPrompt || text}`;
-    
-    // 5. Делаем запрос к Gemini
-    const result = await model.generateContent(fullPrompt);
-    const simplifiedText = result.response.text();
-
-    // 6. Возвращаем результат расширению
-    return res.status(200).json({ 
-      success: true, 
-      text: simplifiedText.trim() 
-    });
-    
-  } catch (error) {
-    console.error('API Error:', error);
-    return res.status(500).json({ 
-      success: false, 
-      error: error.message 
-    });
+  const fullPrompt = `${systemPrompt}\n\n${userPrompt || text}`;
+  
+  // 2. ПЕРЕБИРАЕМ МОДЕЛИ
+  let lastError = null;
+  
+  for (const modelName of MODELS) {
+    try {
+      console.log(`🔄 Пробуем модель: ${modelName}`);
+      
+      const model = genAI.getGenerativeModel({ model: modelName });
+      const result = await model.generateContent(fullPrompt);
+      const simplifiedText = result.response.text();
+      
+      console.log(`✅ Успех с моделью: ${modelName}`);
+      
+      // Успех - возвращаем результат
+      return res.status(200).json({ 
+        success: true, 
+        text: simplifiedText.trim(),
+        modelUsed: modelName  // опционально: какая модель сработала
+      });
+      
+    } catch (error) {
+      console.log(`❌ Модель ${modelName} не сработала: ${error.message}`);
+      lastError = error;
+      
+      // Если ошибка НЕ про квоту (429) и НЕ "модель не найдена" (404) - прекращаем
+      if (!error.message.includes('429') && !error.message.includes('quota') && !error.message.includes('404')) {
+        return res.status(500).json({ success: false, error: error.message });
+      }
+      // Иначе пробуем следующую модель
+    }
   }
+  
+  // 3. Все модели не сработали
+  return res.status(429).json({ 
+    success: false, 
+    error: 'Все модели Gemini временно недоступны. Попробуйте позже или создайте новый API ключ.',
+    details: lastError?.message
+  });
 }
